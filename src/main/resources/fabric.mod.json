@@ -11,7 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.github.sib_energy_craft.energy_container.load.client.Network"
+      "com.github.sib_energy_craft.network.load.client.Network"
     ]
   }
 }
