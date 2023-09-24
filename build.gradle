@@ -12,7 +12,8 @@ def targetJavaVersion = Integer.valueOf(jdk_version)
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven { url 'https://sibmaks.ru/repository/maven-snapshots/' }
+    maven { url 'https://sibmaks.ru/repository/maven-releases/' }
 }
 
 dependencies {

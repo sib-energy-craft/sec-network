@@ -4,6 +4,8 @@ import com.github.sib_energy_craft.network.ScreenHandlerTypedPropertyUpdateS2CPa
 import com.github.sib_energy_craft.screen.TypedPropertyScreenHandler;
 import com.github.sib_energy_craft.sec_utils.load.DefaultClientModInitializer;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.PacketByteBuf;
 
 import static com.github.sib_energy_craft.network.NetworkPackets.UPDATE_SCREEN_TYPED_PROPERTY;
 import static net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver;
@@ -15,25 +17,30 @@ import static net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.
 @Slf4j
 public final class Network implements DefaultClientModInitializer {
     static {
-        registerGlobalReceiver(UPDATE_SCREEN_TYPED_PROPERTY, (client, handler, buf, responseSender) -> {
-            try {
-                var playerEntity = client.player;
-                if (playerEntity == null) {
-                    return;
-                }
-                var currentScreenHandler = playerEntity.currentScreenHandler;
+        registerGlobalReceiver(
+                UPDATE_SCREEN_TYPED_PROPERTY,
+                (client, handler, buf, responseSender) -> updateScreenTypedPacketHandler(client, buf)
+        );
+    }
 
-                if (!(currentScreenHandler instanceof TypedPropertyScreenHandler propertyListener)) {
-                    return;
-                }
-
-                var packet = new ScreenHandlerTypedPropertyUpdateS2CPacket<>(buf);
-                if (currentScreenHandler.syncId == packet.getSyncId()) {
-                    propertyListener.onTypedPropertyChanged(packet.getPropertyId(), packet.getPropertyValue());
-                }
-            } catch (Exception e) {
-                log.error("Int property process error", e);
+    private static void updateScreenTypedPacketHandler(MinecraftClient client, PacketByteBuf buf) {
+        try {
+            var playerEntity = client.player;
+            if (playerEntity == null) {
+                return;
             }
-        });
+            var currentScreenHandler = playerEntity.currentScreenHandler;
+
+            if (!(currentScreenHandler instanceof TypedPropertyScreenHandler propertyListener)) {
+                return;
+            }
+
+            var packet = new ScreenHandlerTypedPropertyUpdateS2CPacket<>(buf);
+            if (currentScreenHandler.syncId == packet.getSyncId()) {
+                propertyListener.onTypedPropertyChanged(packet.getPropertyId(), packet.getPropertyValue());
+            }
+        } catch (Exception e) {
+            log.error("Int property process error", e);
+        }
     }
 }
